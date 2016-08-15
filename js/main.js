@@ -13,7 +13,43 @@ board.build(scene);
 
 camera.position.z = 10;
 
-render();
+var vFOV = camera.fov * Math.PI / 180;        // convert vertical fov to radians
+var height = 2 * Math.tan( vFOV / 2 ) * 10; // visible height
+
+var aspect = window.innerWidth / window.innerHeight;
+var width = height * aspect;
+
+console.log("width: " + width);
+console.log("height: " + height);
+
+$(document).ready(function () {
+    $(document).on('click', function(event) {
+        console.log("Got click");
+        var vector = new THREE.Vector3();
+
+        vector.set(
+            (event.clientX / window.innerWidth) * 2 - 1,
+            - (event.clientY / window.innerHeight) * 2 + 1,
+            0.5 );
+
+        vector.unproject( camera );
+
+        var dir = vector.sub( camera.position ).normalize();
+
+        var distance = - camera.position.z / dir.z;
+
+        var pos = camera.position.clone().add( dir.multiplyScalar( distance ));
+        console.log(pos);
+    });
+
+    render();
+});
+
+$(window).resize(function() {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize( window.innerWidth, window.innerHeight );
+});
 
 function render() {
     requestAnimationFrame(render);

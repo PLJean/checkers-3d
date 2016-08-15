@@ -3,12 +3,9 @@ var color = {
     LIGHT: 1
 };
 
-function Tile() {
+function Tile(color) {
+    this.color = color;
 }
-
-Tile.constructor = function (color) {
-   this.color = color;
-};
 
 Tile.prototype.color = null;
 

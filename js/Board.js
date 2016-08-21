@@ -1,57 +1,104 @@
 function Board() {
-    var index;
     var dark = true;
 
     for (var r = 0; r < Board.SIZE; r++) {
         for (var c = 0; c < Board.SIZE; c++) {
-            if (dark)
-                this.tiles.push(new Tile(color.DARK));
-            else
-                this.tiles.push(new Tile(color.LIGHT));
+            var tile, piece;
+            if (dark) {
+                tile = new Tile(color.DARK, c, r);
+            }
+
+            else {
+                tile = new Tile(color.LIGHT, c, r);
+            }
+
+            if (r < 3 && dark) {
+                piece = new Piece(team.BLACK, c, r);
+                this.teamBlack.push(piece);
+            }
+
+            else if (r > 4 && dark) {
+                piece = new Piece(team.RED, c, r);
+                this.teamRed.push(piece);
+            }
+
+            this.tiles.push(tile);
 
             dark = !dark;
         }
         dark = !dark;
     }
-
-    for (index = 0; index < Board.SIZE * 2; index++) {
-        this.tiles[index].placePiece(new Piece(team.BLACK));
-    }
-
-    for (index = Board.SIZE * Board.SIZE - Board.SIZE * 2; index < Board.SIZE * Board.SIZE; index++) {
-        this.tiles[index].placePiece(new Piece(team.RED));
-    }
 }
+
+Board.SIZE = 8;
 
 Board.prototype.tiles = [];
 
-Board.prototype.at = function(x, y) {
+Board.prototype.teamBlack = [];
+
+Board.prototype.teamRed = [];
+
+Board.prototype.tileAt = function(x, y) {
     return this.tiles[x + Board.SIZE * y];
 };
 
 Board.prototype.build = function (scene) {
-    var position = new THREE.Vector3(-5 * Board.TILE_SIZE, -5 * Board.TILE_SIZE, 0);
+    var startPosition = new THREE.Vector3(-4 * Tile.SIZE + 1/2 * Tile.SIZE, -4 * Tile.SIZE + 1/2 * Tile.SIZE, 0);
 
     for (var r = 0; r < Board.SIZE; r++) {
         for (var c = 0; c < Board.SIZE; c++) {
-            var geometry = new THREE.BoxGeometry(1, 1, 1);
+            var tileGeometry = new THREE.BoxGeometry(Tile.SIZE, Tile.SIZE, 1);
 
-            console.log(this.at(0, 0));
-            if (this.at(c, r).color == color.DARK)
-                var material = new THREE.MeshBasicMaterial({color: 0x808080, vertexColors: THREE.FaceColors});
+            var tileMaterial;
+            if (this.tileAt(c, r).color == color.DARK)
+                tileMaterial = new THREE.MeshBasicMaterial({color: 0x808080, vertexColors: THREE.FaceColors});
             else
-                var material = new THREE.MeshBasicMaterial({color: 0xffffff, vertexColors: THREE.FaceColors});
+                tileMaterial = new THREE.MeshBasicMaterial({color: 0xffffff, vertexColors: THREE.FaceColors});
 
-            var tileCube = new THREE.Mesh(geometry, material);
 
-            // console.log(tileCube.position);
-            tileCube.position.set(position.x + Board.TILE_SIZE * c, position.y + Board.TILE_SIZE * r, position.z);
-            scene.add(tileCube);
+            var newPosition = new THREE.Vector3(startPosition.x + Tile.SIZE * c, startPosition.y + Tile.SIZE * r, startPosition.z);
+
+            this.tileAt(c, r).setPosition(newPosition);
+            this.tileAt(c, r).setMesh(new THREE.Mesh(tileGeometry, tileMaterial));
+            this.tileAt(c, r).mesh.position.set(newPosition.x, newPosition.y, newPosition.z);
+            // console.log(this.tileAt(c, r).position);
+            scene.add(this.tileAt(c, r).mesh);
+            // console.log(newPosition);
         }
     }
 
+    var pieceGeometry, pieceMaterial, col, row, piecePosition, i;
+    for (i = 0; i < this.teamBlack.length; i++) {
+        pieceGeometry = new THREE.CylinderGeometry(Tile.SIZE * .40, Tile.SIZE * .40, 1.25, 32);
+        pieceGeometry.applyMatrix(new THREE.Matrix4().makeRotationX(THREE.Math.degToRad( 90 ) ));
+        pieceMaterial = new THREE.MeshBasicMaterial( {color: 0x000000, vertexColors: THREE.FaceColors});
+        this.teamBlack[i].setMesh(new THREE.Mesh(pieceGeometry, pieceMaterial));
+        col = this.teamBlack[i].col;
+        row = this.teamBlack[i].row;
+        piecePosition = this.tileAt(col, row).position;
+        this.teamBlack[i].mesh.position.set(piecePosition.x, piecePosition.y, piecePosition.z);
+        scene.add(this.teamBlack[i].mesh);
+    }
 
+    for (i = 0; i < this.teamRed.length; i++) {
+        pieceGeometry = new THREE.CylinderGeometry(Tile.SIZE * .40, Tile.SIZE * .40, 1.25, 32);
+        pieceGeometry.applyMatrix(new THREE.Matrix4().makeRotationX(THREE.Math.degToRad( 90 ) ));
+        pieceMaterial = new THREE.MeshBasicMaterial( {color: 0xff0000, vertexColors: THREE.FaceColors});
+        this.teamRed[i].setMesh(new THREE.Mesh(pieceGeometry, pieceMaterial));
+        col = this.teamRed[i].col;
+        row = this.teamRed[i].row;
+        piecePosition = this.tileAt(col, row).position;
+        this.teamRed[i].mesh.position.set(piecePosition.x, piecePosition.y, piecePosition.z);
+        scene.add(this.teamRed[i].mesh);
+    }
 };
 
-Board.SIZE = 10;
-Board.TILE_SIZE = 1;
+Board.prototype.anyTilesClicked = function (x, y) {
+    for (var r = 0; r < Board.SIZE; r++) {
+        for (var c = 0; c < Board.SIZE; c++) {
+            if (this.tileAt(c, r).isClicked(x, y)) {
+                // console.log("r: " + r + " c: " + c);
+            }
+        }
+    }
+};

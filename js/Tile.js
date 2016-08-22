@@ -23,8 +23,12 @@ Tile.prototype.position = null;
 
 Tile.prototype.mesh = null;
 
+Tile.all = [];
+
 Tile.prototype.placePiece = function (piece) {
     this.piece = piece;
+    if (piece != null && piece.mesh != null)
+        piece.mesh.position.set(this.position.x, this.position.y, this.position.z);
 };
 
 Tile.prototype.removePiece = function() {
@@ -35,16 +39,13 @@ Tile.prototype.setMesh = function(mesh) {
     this.mesh = mesh;
 };
 
-Tile.prototype.isClicked = function(x, y) {
-    // console.log(x + ", " + y);
-    var margin = Tile.SIZE / 2;
-    // console.log(this.position.x);
-    if (this.position.x  - margin >= x && x < this.position.x + margin &&
-        this.position.y - margin >= y && y < this.position.y + margin) {
-        return true;
-    }
-
-    return false;
+Tile.prototype.make = function(geometry, material, position) {
+    this.setPosition(position);
+    this.setMesh(new THREE.Mesh(geometry, material));
+    this.mesh.position.set(position.x, position.y, position.z);
+    this.mesh['checkersObject'] = 'Tile';
+    this.mesh['row'] = this.row;
+    this.mesh['col'] = this.col;
 };
 
 Tile.prototype.setPosition = function (vector) {

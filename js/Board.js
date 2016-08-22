@@ -38,6 +38,8 @@ Board.prototype.holding = null;
 
 Board.prototype.currentTurn = team.BLACK;
 
+Board.prototype.legalCircles = [];
+
 Board.prototype.tileAt = function(x, y) {
     return Tile.all[x + Board.SIZE * y];
 };
@@ -65,7 +67,8 @@ Board.prototype.drop = function(x, y) {
         newTile.placePiece(this.holding);
         this.holding.mesh.position.set(newTile.position.x, newTile.position.y, newTile.position.z);
         this.tileAt(oldCol, oldRow).placePiece(null);
-        console.log("Dropped at: (" + x + ", " + y + ")");
+        // console.log("Dropped at: (" + x + ", " + y + ")");
+
     }
 
     this.holding = null;
@@ -73,34 +76,69 @@ Board.prototype.drop = function(x, y) {
 };
 
 Board.prototype.isLegal = function(x, y) {
+    // console.log("in isLegal()");
+    // console.log(x, + ", " + y);
     if (this.holding == null) return false;
-
     var col = this.holding.mesh["col"];
     var row = this.holding.mesh["row"];
 
-    if (this.holding.team == team.BLACK && this.holding.king == false && y <= row)
-        return false;
-
-    else if (this.holding.team == team.RED && this.holding.king == false && y >= row)
-        return false;
-
-    else if (Math.abs(col - x) != 1 || Math.abs(row - y) != 1)
+    if (Math.abs(col - x) != 1 || Math.abs(row - y) != 1)
         return false;
 
     else if (this.pieceAt(x, y) != null)
         return false;
 
+    else if (this.holding.team == team.BLACK && this.holding.king == false && y < row)
+        return false;
+
+    else if (this.holding.team == team.RED && this.holding.king == false && y > row)
+        return false;
+
     return true;
 };
 
-// Board.prototype.allMoves = function(x, y) {
-//     // var piece = this.pieceAt(x, y);
-//     // if (piece != null) {
-//     //
-//     // }
-//     var moves = [];
-//
-// };
+Board.prototype.allMoves = function(x, y) {
+    var possibleMoves = [[x - 1, y - 1], [x - 1, y + 1], [x + 1, y - 1], [x + 1, y + 1]];
+    var moves = [];
+    for (var i = 0; i < possibleMoves.length; i++) {
+        if(this.isLegal(possibleMoves[i][0], possibleMoves[i][1])) {
+            console.log(possibleMoves[i][0], possibleMoves[i][1]);
+            moves.push(possibleMoves[i]);
+        }
+    }
+
+    return moves;
+};
+
+Board.prototype.showLegals = function(x, y, scene) {
+    var piece = this.pieceAt(x, y);
+    console.log("in showLegals()");
+    console.log(piece);
+    if (piece == null) return;
+
+    var moves = this.allMoves(x, y);
+    console.log(moves);
+    for (var i = 0; i < moves.length; i++) {
+        var geometry = new THREE.CircleGeometry(Tile.SIZE * .40, 32);
+        var material = (piece.team == team.BLACK) ? new THREE.LineBasicMaterial({color: 0x000000}) : new THREE.LineBasicMaterial({color: 0xff0000});
+
+        geometry.vertices.shift();
+        var circle = new THREE.Line(geometry, material);
+        var tile = this.tileAt(moves[i][0], moves[i][1]);
+        circle.position.set(tile.position.x, tile.position.y, tile.position.z + 1);
+        circle.name = 'legal' + i;
+        this.legalCircles.push(circle);
+        console.log("circle");
+        console.log(circle);
+        scene.add(circle);
+    }
+};
+
+Board.prototype.unshowLegals = function(scene) {
+    for (var i = 0; i < this.legalCircles.length; i++) {
+        scene.remove(this.legalCircles[i]);
+    }
+};
 
 Board.prototype.build = function (scene) {
     var startPosition = new THREE.Vector3(-4 * Tile.SIZE + 1/2 * Tile.SIZE, -4 * Tile.SIZE + 1/2 * Tile.SIZE, 0);
@@ -145,40 +183,6 @@ Board.prototype.build = function (scene) {
             // console.log(newPosition);
         }
     }
-
-    // var pieceGeometry, pieceMaterial, col, row, piecePosition, i;
-    // for (i = 0; i < Piece.teamBlack.length; i++) {
-    //     pieceGeometry = new THREE.CylinderGeometry(Tile.SIZE * .40, Tile.SIZE * .40, 1.25, 32);
-    //     pieceGeometry.applyMatrix(new THREE.Matrix4().makeRotationX(THREE.Math.degToRad( 90 ) ));
-    //     pieceMaterial = new THREE.MeshBasicMaterial( {color: 0x000000, vertexColors: THREE.FaceColors});
-    //     col = Piece.teamBlack[i].col;
-    //     row = Piece.teamBlack[i].row;
-    //     Piece.teamBlack[i].setMesh(new THREE.Mesh(pieceGeometry, pieceMaterial));
-    //     piecePosition = this.tileAt(col, row).position;
-    //     Piece.teamBlack[i].mesh.position.set(piecePosition.x, piecePosition.y, piecePosition.z);
-    //     Piece.teamBlack[i].mesh["col"] = col;
-    //     Piece.teamBlack[i].mesh["row"] = row;
-    //     Piece.teamBlack[i].mesh["checkersObject"] = 'Piece';
-    //     scene.add(Piece.teamBlack[i].mesh);
-    // }
-    //
-    // for (i = 0; i < Piece.teamRed.length; i++) {
-    //     pieceGeometry = new THREE.CylinderGeometry(Tile.SIZE * .40, Tile.SIZE * .40, 1.25, 32);
-    //     pieceGeometry.applyMatrix(new THREE.Matrix4().makeRotationX(THREE.Math.degToRad( 90 ) ));
-    //     pieceMaterial = new THREE.MeshBasicMaterial( {color: 0xff0000, vertexColors: THREE.FaceColors});
-    //
-    //     col = Piece.teamRed[i].col;
-    //     row = Piece.teamRed[i].row;
-    //     Piece.teamRed[i].setMesh(new THREE.Mesh(pieceGeometry, pieceMaterial));
-    //     piecePosition = this.tileAt(col, row).position;
-    //     Piece.teamRed[i].mesh.position.set(piecePosition.x, piecePosition.y, piecePosition.z);
-    //     Piece.teamRed[i].mesh["col"] = col;
-    //     Piece.teamRed[i].mesh["row"] = row;
-    //     Piece.teamRed[i].mesh["checkersObject"] = 'Piece';
-    //     scene.add(Piece.teamRed[i].mesh);
-    // }
-
-    // console.log(Piece.teamRed[4].mesh["col"]);
 };
 
 Board.prototype.anyTilesClicked = function (x, y) {

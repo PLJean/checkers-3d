@@ -35,6 +35,7 @@ $(document).ready(function () {
             if (intersects[i].object['checkersObject'] == 'Piece') {
                 console.log(intersects[i]);
                 board.grab(intersects[i].object["col"], intersects[i].object["row"]);
+                board.showLegals(intersects[i].object["col"], intersects[i].object["row"], scene);
             }
             /*
              An intersection has the following properties :
@@ -46,6 +47,7 @@ $(document).ready(function () {
              - uv : intersection point in the object's UV coordinates (THREE.Vector2)
              */
         }
+
     });
 
     $(document.body).mouseup(function (event) {
@@ -64,8 +66,10 @@ $(document).ready(function () {
                 console.log(intersects[i]);
                 board.drop(intersects[i].object["col"], intersects[i].object["row"]);
             } else {
-                board.drop(board.holding.col, board.holding.row);
+                // board.drop(board.holding.mesh['col'], board.holding.mesh['row']);
             }
+
+            board.unshowLegals(scene);
             /*
              An intersection has the following properties :
              - object : intersected object (THREE.Mesh)

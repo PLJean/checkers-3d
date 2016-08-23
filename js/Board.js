@@ -142,6 +142,15 @@ Board.prototype.nextTurn = function() {
 
 };
 
+Board.prototype.isGameDone = function() {
+    if (Piece.teamBlack.length == 0) {
+
+    }
+    else if (Piece.teamRed.length == 0) {
+
+    }
+};
+
 Board.prototype.isLegal = function(x, y) {
     // console.log("in isLegal(" + x + ", " + y + ")");
     // console.log(x, + ", " + y);
@@ -240,12 +249,13 @@ Board.prototype.showLegals = function(x, y, scene) {
     // console.log(moves);
     for (var i = 0; i < moves.length; i++) {
         var geometry = new THREE.CircleGeometry(Tile.SIZE * .40, 32);
+        // var geometry = new THREE.CylinderGeometry(Tile.SIZE * .40, 32);
         var material = (piece.team == team.BLACK) ? new THREE.LineBasicMaterial({color: 0x000000}) : new THREE.LineBasicMaterial({color: 0xff0000});
 
         geometry.vertices.shift();
         var circle = new THREE.Line(geometry, material);
         var tile = this.tileAt(moves[i][0], moves[i][1]);
-        circle.position.set(tile.position.x, tile.position.y, tile.position.z + 1);
+        circle.position.set(tile.position.x, tile.position.y, tile.position.z + 0.50);
         circle.name = 'legal' + i;
         this.legalCircles.push(circle);
         // console.log("circle");
@@ -260,6 +270,8 @@ Board.prototype.unshowLegals = function(scene) {
     for (var i = 0; i < this.legalCircles.length; i++) {
         scene.remove(this.legalCircles[i]);
     }
+
+    this.legalCircles = [];
 };
 
 Board.prototype.build = function (scene) {

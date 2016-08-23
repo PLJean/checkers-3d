@@ -28,6 +28,8 @@ black.innerHTML = "<div>BLACK's TURN</div><div>Pieces Left: 12</div>";
 black.style.border ="thick solid #000000";
 black.style.top = 1.5 + '%';
 black.style.left = 10 + '%';
+black.style.padding = "1%";
+black.style.borderRadius = "10%";
 
 var red = document.createElement('div');
 red.setAttribute('id', 'red');
@@ -39,6 +41,8 @@ red.style.height = 100;
 red.innerHTML = "<div>RED</div><div>Pieces Left: 12</div>";
 red.style.top = 1.5 + '%';
 red.style.left = 80 + '%';
+red.style.padding = "1%";
+red.style.borderRadius = "10%";
 
 document.body.appendChild(black);
 document.body.appendChild(red);

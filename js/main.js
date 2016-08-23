@@ -18,6 +18,30 @@ var width = height * aspect;
 var raycaster = new THREE.Raycaster();
 var mouse = { x : 0, y : 0 };
 
+var black = document.createElement('div');
+black.setAttribute('id', 'black');
+black.style.position = 'absolute';
+//text2.style.zIndex = 1;    // if you still don't see the label, try uncommenting this
+black.style.width = 100;
+black.style.height = 100;
+black.innerHTML = "<div>BLACK's TURN</div><div>Pieces Left: 12</div>";
+black.style.border ="thick solid #000000";
+black.style.top = 1.5 + '%';
+black.style.left = 10 + '%';
+
+var red = document.createElement('div');
+red.setAttribute('id', 'red');
+red.style.position = 'absolute';
+//text2.style.zIndex = 1;    // if you still don't see the label, try uncommenting this
+red.style.color = 'red';
+red.style.width = 100;
+red.style.height = 100;
+red.innerHTML = "<div>RED</div><div>Pieces Left: 12</div>";
+red.style.top = 1.5 + '%';
+red.style.left = 80 + '%';
+
+document.body.appendChild(black);
+document.body.appendChild(red);
 
 $(document).ready(function () {
     $(document.body).mousedown(function(event) {

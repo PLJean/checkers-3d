@@ -45,6 +45,7 @@ Board.prototype.tileAt = function(x, y) {
 };
 
 Board.prototype.pieceAt = function(x, y) {
+    // console.log(x + Board.SIZE * y);
     return Tile.all[x + Board.SIZE * y].piece;
 };
 
@@ -57,38 +58,83 @@ Board.prototype.grab = function(x, y) {
     }
 };
 
-Board.prototype.drop = function(x, y) {
+Board.prototype.drop = function(x, y, scene) {
     if (this.holding != null && this.isLegal(x, y)) {
+        var col = this.holding.mesh["col"];
+        var row = this.holding.mesh["row"];
+        if (Math.abs(col - x) == 2 && Math.abs(row - y) == 2) {
+            var jumpX, jumpY;
+            if (x < col) jumpX = x + 1;
+            else jumpX = x - 1;
+
+            if (y < row) jumpY = y + 1;
+            else jumpY = y - 1;
+
+            var jumpPiece = this.pieceAt(jumpX, jumpY);
+            this.tileAt(jumpX, jumpY).removePiece();
+            console.log("Tile at " + x + ", " + y + "is null");
+            scene.remove(jumpPiece.mesh);
+        }
         var newTile = this.tileAt(x, y);
-        var oldCol = this.holding.mesh["col"];
-        var oldRow = this.holding.mesh["row"];
         this.holding.mesh["col"] = x;
         this.holding.mesh["row"] = y;
         newTile.placePiece(this.holding);
         this.holding.mesh.position.set(newTile.position.x, newTile.position.y, newTile.position.z);
-        this.tileAt(oldCol, oldRow).placePiece(null);
-        // console.log("Dropped at: (" + x + ", " + y + ")");
-
+        this.tileAt(col, row).placePiece(null);
     }
 
     this.holding = null;
-
 };
 
 Board.prototype.isLegal = function(x, y) {
-    // console.log("in isLegal()");
+    console.log("in isLegal(" + x + ", " + y + ")");
     // console.log(x, + ", " + y);
     if (this.holding == null) return false;
     var col = this.holding.mesh["col"];
     var row = this.holding.mesh["row"];
 
-    if (Math.abs(col - x) != 1 || Math.abs(row - y) != 1)
+    console.log("passed 1");
+    // Is x, y out of range?
+    if (x < 0 || x > Board.SIZE - 1 || y < 0 || y > Board.SIZE - 1)
         return false;
 
-    else if (this.pieceAt(x, y) != null)
+    if (Math.abs(col - x) != Math.abs(row - y))
         return false;
 
-    else if (this.holding.team == team.BLACK && this.holding.king == false && y < row)
+    console.log("passed 2");
+    // Is there a piece already where holding is trying to go?
+    if (this.pieceAt(x, y) != null)
+        return false;
+
+    console.log("passed 3");
+    // Is holding is trying to stay or go horizontal/vertical.
+    if (Math.abs(col - x) < 1 || Math.abs(row - y) < 1) {
+        return false;
+    }
+
+    else if (Math.abs(col - x) == 2 && Math.abs(row - y) == 2) {
+        var jumpX, jumpY;
+        if (x < col) jumpX = x + 1;
+        else jumpX = x - 1;
+
+        if (y < row) jumpY = y + 1;
+        else jumpY = y - 1;
+
+        var jumpPiece = this.pieceAt(jumpX, jumpY);
+        console.log("jumpPiece is: ");
+        console.log(jumpPiece);
+        if (jumpPiece == null)
+            return false;
+
+        else if (jumpPiece.team == this.holding.team) {
+            return false;
+        }
+    }
+
+    console.log("passed 4");
+
+
+    if (this.holding.team == team.BLACK && this.holding.king == false && y < row)
         return false;
 
     else if (this.holding.team == team.RED && this.holding.king == false && y > row)
@@ -98,11 +144,12 @@ Board.prototype.isLegal = function(x, y) {
 };
 
 Board.prototype.allMoves = function(x, y) {
-    var possibleMoves = [[x - 1, y - 1], [x - 1, y + 1], [x + 1, y - 1], [x + 1, y + 1]];
+    console.log("allMoves");
+    var possibleMoves = [[x - 1, y - 1], [x - 1, y + 1], [x + 1, y - 1], [x + 1, y + 1], [x - 2, y - 2], [x - 2, y + 2], [x + 2, y - 2], [x + 2, y + 2]];
     var moves = [];
     for (var i = 0; i < possibleMoves.length; i++) {
         if(this.isLegal(possibleMoves[i][0], possibleMoves[i][1])) {
-            console.log(possibleMoves[i][0], possibleMoves[i][1]);
+            // console.log(possibleMoves[i][0], possibleMoves[i][1]);
             moves.push(possibleMoves[i]);
         }
     }
@@ -111,13 +158,14 @@ Board.prototype.allMoves = function(x, y) {
 };
 
 Board.prototype.showLegals = function(x, y, scene) {
+    console.log("showing Legals");
     var piece = this.pieceAt(x, y);
-    console.log("in showLegals()");
-    console.log(piece);
+    // console.log("in showLegals()");
+    // console.log(piece);
     if (piece == null) return;
-
+    // console.log("(" + x + ", " + y + ")");
     var moves = this.allMoves(x, y);
-    console.log(moves);
+    // console.log(moves);
     for (var i = 0; i < moves.length; i++) {
         var geometry = new THREE.CircleGeometry(Tile.SIZE * .40, 32);
         var material = (piece.team == team.BLACK) ? new THREE.LineBasicMaterial({color: 0x000000}) : new THREE.LineBasicMaterial({color: 0xff0000});
@@ -128,10 +176,12 @@ Board.prototype.showLegals = function(x, y, scene) {
         circle.position.set(tile.position.x, tile.position.y, tile.position.z + 1);
         circle.name = 'legal' + i;
         this.legalCircles.push(circle);
-        console.log("circle");
-        console.log(circle);
+        // console.log("circle");
+        // console.log(circle);
         scene.add(circle);
     }
+
+    console.log(moves);
 };
 
 Board.prototype.unshowLegals = function(scene) {

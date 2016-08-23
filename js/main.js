@@ -33,7 +33,7 @@ $(document).ready(function () {
         for ( var i = 0; i < intersects.length; i++ ) {
 
             if (intersects[i].object['checkersObject'] == 'Piece') {
-                console.log(intersects[i]);
+                // console.log(intersects[i]);
                 board.grab(intersects[i].object["col"], intersects[i].object["row"]);
                 board.showLegals(intersects[i].object["col"], intersects[i].object["row"], scene);
             }
@@ -63,8 +63,8 @@ $(document).ready(function () {
         for ( var i = 0; i < intersects.length; i++ ) {
 
             if (intersects[i].object['checkersObject'] == 'Tile') {
-                console.log(intersects[i]);
-                board.drop(intersects[i].object["col"], intersects[i].object["row"]);
+                // console.log(intersects[i]);
+                board.drop(intersects[i].object["col"], intersects[i].object["row"], scene);
             } else {
                 // board.drop(board.holding.mesh['col'], board.holding.mesh['row']);
             }

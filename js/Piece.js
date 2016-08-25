@@ -28,3 +28,6 @@ Piece.prototype.setPosition = function(col, row) {
     this.row = row;
 };
 
+Piece.prototype.King = function() {
+
+};

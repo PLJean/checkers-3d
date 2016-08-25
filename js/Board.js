@@ -123,6 +123,7 @@ Board.prototype.drop = function(x, y, scene) {
         else if (this.allJumps(x, y).length > 0) {
             this.multipleJumps = true;
         }
+
     }
 
     this.holding = null;

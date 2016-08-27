@@ -36,6 +36,8 @@ Board.SIZE = 8;
 
 Board.prototype.holding = null;
 
+Board.prototype.holdingSavedPosition = null;
+
 Board.prototype.lastHolding = null;
 
 Board.prototype.currentTurn = team.BLACK;
@@ -59,20 +61,36 @@ Board.prototype.grab = function(x, y) {
     if (this.holding == null && piece.team == this.currentTurn) {
         if (this.multipleJumps == false) this.holding = piece;
         else if(piece == this.lastHolding) this.holding = this.lastHolding;
-        // console.log("Holding: (" + x + ", " + y + ")");
+
+        this.holdingSavedPosition = new THREE.Vector3(this.holding.mesh.position.x, this.holding.mesh.position.y, this.holding.mesh.position.z);
+        console.log(this.holdingSavedPosition);
     } else {
         if (this.holding != null) console.log("Cannot grab. Currently holding: (" + this.holding + ")" );
         else if (piece.team != this.currentTurn) console.log("Not your turn.");
     }
 };
 
-Board.prototype.drop = function(x, y, scene) {
-    // console.log("drop");
-    if (this.holding == null || x == this.holding.mesh["col"] && y == this.holding.mesh["row"]) {
+Board.prototype.moveHolding = function (scene, camera, x, y) {
 
+    // Make the sphere follow the mouse
+    if (this.holding != null) {
+        var vector = new THREE.Vector3(x, y, this.holding.mesh.position.z);
+        vector.unproject( camera );
+        var dir = vector.sub( camera.position ).normalize();
+        var distance = - camera.position.z / dir.z;
+        var pos = camera.position.clone().add( dir.multiplyScalar( distance ) );
+        this.holding.mesh.position.copy(pos);
     }
 
-    else if (this.isLegal(x, y)) {
+};
+
+Board.prototype.drop = function(x, y, scene) {
+    var legal = this.isLegal(x, y);
+    if (this.holding == null || !legal || x == this.holding.mesh["col"] && y == this.holding.mesh["row"]) {
+        this.holding.mesh.position.set(this.holdingSavedPosition.x, this.holdingSavedPosition.y, this.holdingSavedPosition.z);
+    }
+
+    else if (legal) {
         var col = this.holding.mesh["col"];
         var row = this.holding.mesh["row"];
         var jumpX = null, jumpY = null;
@@ -206,8 +224,6 @@ Board.prototype.isLegal = function(x, y) {
     return true;
 };
 
-
-
 Board.prototype.allMoves = function(x, y) {
     // console.log("allMoves");
     var possibleMoves = [[x - 1, y - 1], [x - 1, y + 1], [x + 1, y - 1], [x + 1, y + 1], [x - 2, y - 2], [x - 2, y + 2], [x + 2, y - 2], [x + 2, y + 2]];
@@ -224,7 +240,7 @@ Board.prototype.allMoves = function(x, y) {
 
 Board.prototype.allJumps = function(x, y) {
     // console.log("all jumps");
-
+    if (this.holding == null) return [];
     var col = this.holding.mesh["col"];
     var row = this.holding.mesh["row"];
     var moves = this.allMoves(x, y);
@@ -330,4 +346,10 @@ Board.prototype.anyTilesClicked = function (x, y) {
             }
         }
     }
+};
+
+Board.prototype.render = function(scene) {
+    if (this.holding) this.moveHolding();
+
+    this.holding.mesh.position.set();
 };

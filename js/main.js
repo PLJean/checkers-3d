@@ -47,6 +47,8 @@ red.style.borderRadius = "10%";
 document.body.appendChild(black);
 document.body.appendChild(red);
 
+var mousedown = null;
+
 $(document).ready(function () {
     $(document.body).mousedown(function(event) {
         mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
@@ -76,9 +78,17 @@ $(document).ready(function () {
              */
         }
 
+        board.moveHolding(scene, camera, mouse.x, mouse.y);
     });
 
-    $(document.body).mouseup(function (event) {
+    $(document.body).mousemove(function(event) {
+
+        mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+        mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+
+        board.moveHolding(scene, camera, mouse.x, mouse.y);
+    });
+        $(document.body).mouseup(function (event) {
         mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
         mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
 
@@ -109,6 +119,7 @@ $(document).ready(function () {
              */
         }
     });
+
     render();
 });
 

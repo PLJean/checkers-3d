@@ -47,7 +47,11 @@ red.style.borderRadius = "10%";
 document.body.appendChild(black);
 document.body.appendChild(red);
 
-var mousedown = null;
+var grabbed = false;
+
+controls = new THREE.OrbitControls( camera );
+controls.addEventListener( 'change', render );
+
 
 $(document).ready(function () {
     $(document.body).mousedown(function(event) {
@@ -64,8 +68,15 @@ $(document).ready(function () {
 
             if (intersects[i].object['checkersObject'] == 'Piece') {
                 // console.log(intersects[i]);
-                board.grab(intersects[i].object["col"], intersects[i].object["row"]);
-                board.showLegals(intersects[i].object["col"], intersects[i].object["row"], scene);
+                var success = board.grab(intersects[i].object["col"], intersects[i].object["row"]);
+                if (success) {
+                    board.showLegals(intersects[i].object["col"], intersects[i].object["row"], scene);
+                    grabbed = true;
+                }
+            }
+
+            else if (intersects[i].object['checkersObject'] == 'Tile') {
+                controls.enabled = false;
             }
             /*
              An intersection has the following properties :
@@ -88,7 +99,8 @@ $(document).ready(function () {
 
         board.moveHolding(scene, camera, mouse.x, mouse.y);
     });
-        $(document.body).mouseup(function (event) {
+
+    $(document.body).mouseup(function (event) {
         mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
         mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
 
@@ -102,7 +114,11 @@ $(document).ready(function () {
 
             if (intersects[i].object['checkersObject'] == 'Tile') {
                 // console.log(intersects[i]);
-                board.drop(intersects[i].object["col"], intersects[i].object["row"], scene);
+                var success = board.drop(intersects[i].object["col"], intersects[i].object["row"], scene);
+                if (success) {
+                    grabbed = false;
+                }
+
             } else {
                 // board.drop(board.holding.mesh['col'], board.holding.mesh['row']);
             }
@@ -118,6 +134,8 @@ $(document).ready(function () {
              - uv : intersection point in the object's UV coordinates (THREE.Vector2)
              */
         }
+        controls.enabled = true;
+
     });
 
     render();

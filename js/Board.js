@@ -63,31 +63,38 @@ Board.prototype.grab = function(x, y) {
         else if(piece == this.lastHolding) this.holding = this.lastHolding;
 
         this.holdingSavedPosition = new THREE.Vector3(this.holding.mesh.position.x, this.holding.mesh.position.y, this.holding.mesh.position.z);
-        console.log(this.holdingSavedPosition);
+        return true;
     } else {
         if (this.holding != null) console.log("Cannot grab. Currently holding: (" + this.holding + ")" );
         else if (piece.team != this.currentTurn) console.log("Not your turn.");
+        return false;
     }
 };
 
 Board.prototype.moveHolding = function (scene, camera, x, y) {
 
-    // Make the sphere follow the mouse
     if (this.holding != null) {
+        // console.log("in");
+        // console.log(this.holding.mesh.position.z);
         var vector = new THREE.Vector3(x, y, this.holding.mesh.position.z);
         vector.unproject( camera );
         var dir = vector.sub( camera.position ).normalize();
         var distance = - camera.position.z / dir.z;
         var pos = camera.position.clone().add( dir.multiplyScalar( distance ) );
+        pos.z = this.holdingSavedPosition.z + 0.05;
         this.holding.mesh.position.copy(pos);
+        // console.log("out");
+        // console.log(this.holding.mesh.position.z);
     }
-
 };
 
 Board.prototype.drop = function(x, y, scene) {
     var legal = this.isLegal(x, y);
     if (this.holding == null || !legal || x == this.holding.mesh["col"] && y == this.holding.mesh["row"]) {
         this.holding.mesh.position.set(this.holdingSavedPosition.x, this.holdingSavedPosition.y, this.holdingSavedPosition.z);
+        this.holding = null;
+
+        return false;
     }
 
     else if (legal) {
@@ -124,8 +131,11 @@ Board.prototype.drop = function(x, y, scene) {
         var newTile = this.tileAt(x, y);
         this.holding.mesh["col"] = x;
         this.holding.mesh["row"] = y;
+
+        this.holding.mesh.position.set(newTile.position.x, newTile.position.y, this.holding.mesh.position.z);
+        console.log("oldposition:");
+        console.log(this.holding.mesh.position.z);
         newTile.placePiece(this.holding);
-        this.holding.mesh.position.set(newTile.position.x, newTile.position.y, newTile.position.z);
         this.tileAt(col, row).removePiece();
 
         this.lastHolding = this.holding;
@@ -141,10 +151,14 @@ Board.prototype.drop = function(x, y, scene) {
         else if (this.allJumps(x, y).length > 0) {
             this.multipleJumps = true;
         }
+        console.log("newposition:");
+        console.log(this.holding.mesh.position.z);
+        this.holding = null;
 
+        return true;
     }
 
-    this.holding = null;
+    return false;
 };
 
 Board.prototype.nextTurn = function() {
@@ -272,7 +286,7 @@ Board.prototype.showLegals = function(x, y, scene) {
         geometry.vertices.shift();
         var circle = new THREE.Line(geometry, material);
         var tile = this.tileAt(moves[i][0], moves[i][1]);
-        circle.position.set(tile.position.x, tile.position.y, tile.position.z + 0.50);
+        circle.position.set(tile.position.x, tile.position.y, tile.position.z + 0.15);
         circle.name = 'legal' + i;
         this.legalCircles.push(circle);
         // console.log("circle");
@@ -296,7 +310,7 @@ Board.prototype.build = function (scene) {
 
     for (var r = 0; r < Board.SIZE; r++) {
         for (var c = 0; c < Board.SIZE; c++) {
-            var tileGeometry = new THREE.BoxGeometry(Tile.SIZE, Tile.SIZE, 1);
+            var tileGeometry = new THREE.BoxGeometry(Tile.SIZE, Tile.SIZE, .20);
 
             var tileMaterial;
             if (this.tileAt(c, r).color == color.DARK)
@@ -313,7 +327,7 @@ Board.prototype.build = function (scene) {
             var piece = this.tileAt(c, r).piece;
             if (piece != null) {
                 var pieceGeometry, pieceMaterial, col, row, piecePosition, i;
-                pieceGeometry = new THREE.CylinderGeometry(Tile.SIZE * .40, Tile.SIZE * .40, 1.25, 32);
+                pieceGeometry = new THREE.CylinderGeometry(Tile.SIZE * .40, Tile.SIZE * .40, .10, 32);
                 pieceGeometry.applyMatrix(new THREE.Matrix4().makeRotationX(THREE.Math.degToRad( 90 ) ));
                 if (piece.team == team.BLACK)
                     pieceMaterial = new THREE.MeshBasicMaterial({color: 0x000000, vertexColors: THREE.FaceColors});
@@ -326,7 +340,8 @@ Board.prototype.build = function (scene) {
                 piece.mesh["col"] = c;
                 piece.mesh["row"] = r;
                 piecePosition = this.tileAt(c, r).position;
-                piece.mesh.position.set(piecePosition.x, piecePosition.y, piecePosition.z);
+
+                piece.mesh.position.set(piecePosition.x, piecePosition.y, piecePosition.z + 0.10);
                 scene.add(piece.mesh);
             }
 

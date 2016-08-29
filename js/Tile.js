@@ -28,7 +28,7 @@ Tile.all = [];
 Tile.prototype.placePiece = function (piece) {
     this.piece = piece;
     if (piece != null && piece.mesh != null)
-        piece.mesh.position.set(this.position.x, this.position.y, this.position.z);
+        piece.mesh.position.set(this.position.x, this.position.y, this.piece.mesh.position.z);
 };
 
 Tile.prototype.removePiece = function() {

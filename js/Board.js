@@ -81,7 +81,7 @@ Board.prototype.moveHolding = function (scene, camera, x, y) {
         var dir = vector.sub( camera.position ).normalize();
         var distance = - camera.position.z / dir.z;
         var pos = camera.position.clone().add( dir.multiplyScalar( distance ) );
-        pos.z = this.holdingSavedPosition.z + 0.05;
+        pos.z = this.holdingSavedPosition.z + 0.40;
         this.holding.mesh.position.copy(pos);
         // console.log("out");
         // console.log(this.holding.mesh.position.z);
@@ -132,7 +132,7 @@ Board.prototype.drop = function(x, y, scene) {
         this.holding.mesh["col"] = x;
         this.holding.mesh["row"] = y;
 
-        this.holding.mesh.position.set(newTile.position.x, newTile.position.y, this.holding.mesh.position.z);
+        this.holding.mesh.position.set(newTile.position.x, newTile.position.y, this.holdingSavedPosition.z);
         console.log("oldposition:");
         console.log(this.holding.mesh.position.z);
         newTile.placePiece(this.holding);

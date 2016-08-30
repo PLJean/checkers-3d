@@ -310,7 +310,7 @@ Board.prototype.build = function (scene) {
 
     for (var r = 0; r < Board.SIZE; r++) {
         for (var c = 0; c < Board.SIZE; c++) {
-            var tileGeometry = new THREE.BoxGeometry(Tile.SIZE, Tile.SIZE, .20);
+            var tileGeometry = new THREE.BoxGeometry(Tile.SIZE, Tile.SIZE, .05);
 
             var tileMaterial;
             if (this.tileAt(c, r).color == color.DARK)
@@ -348,6 +348,28 @@ Board.prototype.build = function (scene) {
             // console.log(this.tileAt(c, r).position);
             // console.log(newPosition);
         }
+    }
+
+    var board_thickness = 7;
+    for (var lvl = 1; lvl < board_thickness; lvl++) {
+        var newSize = Tile.SIZE * Board.SIZE + 1 / (Tile.SIZE * 2) * lvl;
+        var levelGeometry = new THREE.BoxGeometry(newSize, newSize, 0.05);
+        if (lvl % 2 == 0)
+            var levelMaterial = new THREE.MeshBasicMaterial({color: 0x666666, vertexColors: THREE.FaceColors});
+
+        else
+            var levelMaterial = new THREE.MeshBasicMaterial({color: 0x808080, vertexColors: THREE.FaceColors});
+
+
+        var levelMesh = new THREE.Mesh(levelGeometry, levelMaterial);
+        levelMesh.position.set(0,0,-0.05 * lvl);
+        // this.setPosition(position);
+        // this.setMesh(new THREE.Mesh(geometry, material));
+        // this.mesh.position.set(position.x, position.y, position.z);
+        // this.mesh['checkersObject'] = 'Tile';
+        // this.mesh['row'] = this.row;
+        // this.mesh['col'] = this.col;
+        scene.add(levelMesh);
     }
 };
 

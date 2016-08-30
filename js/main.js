@@ -4,7 +4,7 @@ camera.position.z = 10;
 
 var renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.setClearColor(0xb2b2ff, 1);
+renderer.setClearColor(0xE8F1D4, 1);
 document.body.appendChild(renderer.domElement);
 
 var board = new Board();
@@ -15,6 +15,16 @@ var height = 2 * Math.tan( vFOV / 2 ) * 10; // visible height
 var aspect = window.innerWidth / window.innerHeight;
 var width = height * aspect;
 
+var ambientLight = new THREE.AmbientLight(0x0c0c0c);
+scene.add(ambientLight);
+
+var spotLight = new THREE.SpotLight(0xffffff);
+spotLight.position.set(0, 0, 10);
+
+spotLight.castShadow = true;
+
+scene.add(spotLight);
+
 var raycaster = new THREE.Raycaster();
 var mouse = { x : 0, y : 0 };
 
@@ -22,30 +32,32 @@ var black = document.createElement('div');
 black.setAttribute('id', 'black');
 black.style.position = 'absolute';
 //text2.style.zIndex = 1;    // if you still don't see the label, try uncommenting this
+black.style.color = '#D1D1D1';
 black.style.width = 100;
 black.style.height = 100;
-black.innerHTML = "<div>BLACK's TURN</div><div>Pieces Left: 12</div>";
-black.style.border ="thick solid #000000";
+black.style.fontSize = '24px';
+black.innerHTML = "<div style='font-weight:bold;'>WHITE</div><div style='color: black'>RED</div>"
+black.style.border ="thick solid #aa7243";
+black.style.backgroundColor = "#7a5230";
 black.style.top = 1.5 + '%';
-black.style.left = 10 + '%';
+black.style.left = 1 + '%';
 black.style.padding = "1%";
-black.style.borderRadius = "10%";
 
-var red = document.createElement('div');
-red.setAttribute('id', 'red');
-red.style.position = 'absolute';
-//text2.style.zIndex = 1;    // if you still don't see the label, try uncommenting this
-red.style.color = 'red';
-red.style.width = 100;
-red.style.height = 100;
-red.innerHTML = "<div>RED</div><div>Pieces Left: 12</div>";
-red.style.top = 1.5 + '%';
-red.style.left = 80 + '%';
-red.style.padding = "1%";
-red.style.borderRadius = "10%";
+// var red = document.createElement('div');
+// red.setAttribute('id', 'red');
+// red.style.position = 'absolute';
+// //text2.style.zIndex = 1;    // if you still don't see the label, try uncommenting this
+// red.style.color = 'red';
+// red.style.width = 100;
+// red.style.height = 100;
+// red.innerHTML = "<div>RED</div><div>Pieces Left: 12</div>";
+// red.style.top = 1.5 + '%';
+// // red.style.left = 90 + '%';
+//
+// red.style.padding = "1%";
 
 document.body.appendChild(black);
-document.body.appendChild(red);
+// document.body.appendChild(red);
 
 var grabbed = false;
 

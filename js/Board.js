@@ -164,13 +164,11 @@ Board.prototype.drop = function(x, y, scene) {
 Board.prototype.nextTurn = function() {
     if (this.currentTurn == team.BLACK) {
         this.currentTurn = team.RED;
-        $('#black').html("<div>BLACK</div><div>Pieces Left: " + Piece.teamBlack.length + " </div>").css({"border":"none"});
-        $('#red').html("<div>RED's TURN</div><div>Pieces Left: " + Piece.teamRed.length + " </div>").css({"border":"solid"});
+        $('#black').html("<div style='color: black'>WHITE</div><div style='color: red; font-weight:bold;'>RED</div>");
     }
     else {
         this.currentTurn = team.BLACK;
-        $('#black').html("<div>BLACK's TURN</div><div>Pieces Left: " + Piece.teamBlack.length + " </div>").css({"border":"solid"});
-        $('#red').html("<div>RED</div><div>Pieces Left: " + Piece.teamRed.length + " </div>").css({"border":"none"});
+        $('#black').html("<div style='font-weight:bold;'>WHITE</div><div style='color: black'>RED</div>");
     }
 
 };
@@ -314,9 +312,9 @@ Board.prototype.build = function (scene) {
 
             var tileMaterial;
             if (this.tileAt(c, r).color == color.DARK)
-                tileMaterial = new THREE.MeshBasicMaterial({color: 0x808080, vertexColors: THREE.FaceColors});
+                tileMaterial = new THREE.MeshLambertMaterial({color: 0x808080, vertexColors: THREE.FaceColors});
             else
-                tileMaterial = new THREE.MeshBasicMaterial({color: 0xffffff, vertexColors: THREE.FaceColors});
+                tileMaterial = new THREE.MeshLambertMaterial({color: 0xffffff, vertexColors: THREE.FaceColors});
 
 
             var newPosition = new THREE.Vector3(startPosition.x + Tile.SIZE * c, startPosition.y + Tile.SIZE * r, startPosition.z);
@@ -326,15 +324,28 @@ Board.prototype.build = function (scene) {
 
             var piece = this.tileAt(c, r).piece;
             if (piece != null) {
-                var pieceGeometry, pieceMaterial, col, row, piecePosition, i;
-                pieceGeometry = new THREE.CylinderGeometry(Tile.SIZE * .40, Tile.SIZE * .40, .10, 32);
-                pieceGeometry.applyMatrix(new THREE.Matrix4().makeRotationX(THREE.Math.degToRad( 90 ) ));
-                if (piece.team == team.BLACK)
-                    pieceMaterial = new THREE.MeshBasicMaterial({color: 0x000000, vertexColors: THREE.FaceColors});
-                else
-                    pieceMaterial = new THREE.MeshBasicMaterial({color: 0xff0000, vertexColors: THREE.FaceColors});
+                var pieceGeometry, bottomPieceGeometry, topPieceGeometry, pieceMaterial, col, row, piecePosition, i;
+                bottomPieceGeometry = new THREE.CylinderGeometry(Tile.SIZE * .35, Tile.SIZE * .40, .20, 32);
+                topPieceGeometry = new THREE.CylinderGeometry(Tile.SIZE * .40, Tile.SIZE * .35, .20, 32);
 
-                piece.setMesh(new THREE.Mesh(pieceGeometry, pieceMaterial));
+                bottomPieceGeometry.applyMatrix(new THREE.Matrix4().makeRotationX(THREE.Math.degToRad( 90 ) ));
+                topPieceGeometry.applyMatrix(new THREE.Matrix4().makeRotationX(THREE.Math.degToRad( 90 ) ));
+                topPieceGeometry.applyMatrix(new THREE.Matrix4().makeTranslation(0,0, 0.10));
+
+                if (piece.team == team.BLACK)
+                    pieceMaterial = new THREE.MeshLambertMaterial({color: 0xD1D1D1, vertexColors: THREE.FaceColors});
+                else
+                    pieceMaterial = new THREE.MeshLambertMaterial({color: 0xff0000, vertexColors: THREE.FaceColors});
+
+                var bottomMesh = new THREE.Mesh(bottomPieceGeometry, pieceMaterial);
+                bottomMesh.updateMatrix();
+                topPieceGeometry.merge(bottomMesh.geometry, bottomMesh.matrix);
+
+                piece.setMesh(new THREE.Mesh(topPieceGeometry, pieceMaterial));
+                // piece.setMesh(new THREE.Mesh(pieceGeometry, pieceMaterial));
+                // var bottomPieceGeometry.mesh.updateMatrix();
+
+
 
                 piece.mesh["checkersObject"] = 'Piece';
                 piece.mesh["col"] = c;
@@ -344,9 +355,6 @@ Board.prototype.build = function (scene) {
                 piece.mesh.position.set(piecePosition.x, piecePosition.y, piecePosition.z + 0.10);
                 scene.add(piece.mesh);
             }
-
-            // console.log(this.tileAt(c, r).position);
-            // console.log(newPosition);
         }
     }
 
@@ -355,10 +363,10 @@ Board.prototype.build = function (scene) {
         var newSize = Tile.SIZE * Board.SIZE + 1 / (Tile.SIZE * 2) * lvl;
         var levelGeometry = new THREE.BoxGeometry(newSize, newSize, 0.05);
         if (lvl % 2 == 0)
-            var levelMaterial = new THREE.MeshBasicMaterial({color: 0x666666, vertexColors: THREE.FaceColors});
+            var levelMaterial = new THREE.MeshLambertMaterial({color: 0x666666, vertexColors: THREE.FaceColors});
 
         else
-            var levelMaterial = new THREE.MeshBasicMaterial({color: 0x808080, vertexColors: THREE.FaceColors});
+            var levelMaterial = new THREE.MeshLambertMaterial({color: 0x808080, vertexColors: THREE.FaceColors});
 
 
         var levelMesh = new THREE.Mesh(levelGeometry, levelMaterial);

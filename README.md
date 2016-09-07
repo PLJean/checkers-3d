@@ -1,3 +1,3 @@
-# Checkers JS
+# Checkers 3d
 
-## patrickjean.me/checkers
+## Check it out at: [web app](http://patrickjean.me/flashcard)

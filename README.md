@@ -1,3 +1,3 @@
 # Checkers 3d
 
-## Check it out at: [web app](http://patrickjean.me/flashcard)
+## [Click to Play Checkers now!] (http://patrickjean.me/checkers)

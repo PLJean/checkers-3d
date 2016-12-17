@@ -2,8 +2,6 @@
 
 ## [Click to Play Checkers now!] (http://patrickjean.me/checkers)
 
-This is a project I'm currently working on. Made using three.js and obviously, Javascript. Currently taking class so development on it is slow... :'(
-
 ## How to play
 
 1. Wait for your turn as indicated in the top left corner.

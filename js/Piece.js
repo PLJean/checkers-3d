@@ -13,10 +13,12 @@ Piece.teamBlack = [];
 
 Piece.teamRed = [];
 
-function Piece(team, col, row) {
+function Piece(team, col, row, radius, height) {
     this.team = team;
     this.col = col;
     this.row = row;
+    this.radius = radius;
+    this.height = height;
 }
 
 Piece.prototype.setMesh = function(mesh) {

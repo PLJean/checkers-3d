@@ -4,7 +4,7 @@ camera.position.z = 10;
 
 var renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.setClearColor(0xE8F1D4, 1);
+renderer.setClearColor(0x1a2a5a, 1);
 document.body.appendChild(renderer.domElement);
 
 var board = new Board();
@@ -20,7 +20,6 @@ scene.add(ambientLight);
 
 var spotLight = new THREE.SpotLight(0xffffff);
 spotLight.position.set(0, 0, 10);
-
 spotLight.castShadow = true;
 
 scene.add(spotLight);
@@ -36,7 +35,11 @@ black.style.color = '#D1D1D1';
 black.style.width = 100;
 black.style.height = 100;
 black.style.fontSize = '24px';
-black.innerHTML = "<div style='font-weight:bold;'>WHITE</div><div style='color: black'>RED</div>"
+black.innerHTML = "<table>" +
+    "<tr style='font-weight:bold;'><td>WHITE</td><td>( 12 Left )</td></tr>" +
+    "<tr style='color: black'><td>RED</td><td>( 12 Left )</td></tr>" +
+    "</table>";
+
 black.style.border ="thick solid #aa7243";
 black.style.backgroundColor = "#7a5230";
 black.style.top = 1.5 + '%';
@@ -77,8 +80,8 @@ $(document).ready(function () {
         var intersects = raycaster.intersectObjects( scene.children );
 
         for ( var i = 0; i < intersects.length; i++ ) {
-
             if (intersects[i].object['checkersObject'] == 'Piece') {
+                console.log(intersects[i]);
                 // console.log(intersects[i]);
                 var success = board.grab(intersects[i].object["col"], intersects[i].object["row"]);
                 if (success) {
@@ -153,13 +156,31 @@ $(document).ready(function () {
     render();
 });
 
+
 $(window).resize(function() {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize( window.innerWidth, window.innerHeight );
 });
 
+var origin = camera.position;
+var animate = true;
+var clock = new THREE.Clock();
+
+function rotateAnimation() {
+
+    camera.position.y += clock.getElapsedTime() * 2.5;
+    camera.position.z += clock.getElapsedTime() * 2.5;
+}
+
 function render() {
     requestAnimationFrame(render);
+    // if (animate == true) {
+    //     rotateAnimation();
+    // }
+    //
+    // if (camera.position.z > 10) camera.position.z = 10;
+    // if (camera.position.y > 0) camera.position.y = 0;
+    // if (camera.position.y >= 10 && camera.position.z >= 10) animate = false;
     renderer.render(scene, camera);
 }
